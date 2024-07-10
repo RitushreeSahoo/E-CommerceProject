@@ -41,7 +41,7 @@ public interface ActionInterface {
     public boolean click1(WebElement locator, String locatorName);
     public void fluentWait(WebDriver driver,WebElement element, int timeOut);
     public void implicitWait(WebDriver driver, int timeOut);
-    public void explicitWait(WebDriver driver, WebElement element, int timeOut);
+    public void explicitWait(WebDriver driver, WebElement element);
     public void pageLoadTimeOut(WebDriver driver, int timeOut);
     public String screenShot(WebDriver driver, String filename);
     public String getCurrentTime();

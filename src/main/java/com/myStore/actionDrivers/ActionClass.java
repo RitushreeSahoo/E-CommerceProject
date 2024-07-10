@@ -2,15 +2,17 @@ package com.myStore.actionDrivers;
 
 import com.myStore.ActionInterface.ActionInterface;
 import com.myStore.base.BaseClass;
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.*;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 
@@ -309,77 +311,150 @@ public class ActionClass extends BaseClass implements ActionInterface
 
     @Override
     public boolean switchToNewWindow(WebDriver driver) {
-        return false;
+        try {
+            Set<String> newWindow = driver.getWindowHandles();
+            Object popup[] = newWindow.toArray();
+            driver.switchTo().window(popup[1].toString());
+        }catch(Exception e){
+            return false;
+        }
+        return true;
+
     }
 
     @Override
     public boolean switchToOldWindow(WebDriver driver) {
-        return false;
+        try {
+            Set<String> oldWindow = driver.getWindowHandles();
+            Object popup[] = oldWindow.toArray();
+            driver.switchTo().window(popup[0].toString());
+        }catch(Exception e){
+            return false;
+        }
+        return true;
     }
 
     @Override
     public int getColumncount(WebElement row) {
-        return 0;
+        List<WebElement> columns = row.findElements(By.tagName("td"));
+        int a = columns.size();
+        System.out.println(a);
+        for (WebElement column : columns){
+            System.out.println(column.getText());
+
+
+        }
+        return a;
     }
 
     @Override
     public int getRowCount(WebElement table) {
-        return 0;
+        List<WebElement> rows = table.findElements(By.tagName("tr"));
+        int a = rows.size()-1;
+        return a;
+
     }
 
     @Override
     public boolean Alert(WebDriver driver) {
-        return false;
+        Alert alert = driver.switchTo().alert();
+        alert.accept();
+        return true;
     }
 
     @Override
     public boolean launchUrl(WebDriver driver, String url) {
-        return false;
+        try{
+            driver.navigate().to(url);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return true;
     }
 
     @Override
     public boolean isAlertPresent(WebDriver driver) {
-        return false;
+        try
+        {
+            driver.switchTo().alert();
+            return true;
+        }   // try
+        catch (NoAlertPresentException Ex)
+        {
+            return false;
+        }   // catch
     }
 
     @Override
     public String getCurrentURL(WebDriver driver) {
-        return null;
+        String text1 = driver.getCurrentUrl();
+        return text1;
     }
 
     @Override
     public String getTitle(WebDriver driver) {
-        return null;
+        String text = driver.getTitle();
+        return text;
     }
 
     @Override
     public boolean click1(WebElement locator, String locatorName) {
-        return false;
+        try{
+            locator.click();
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public void fluentWait(WebDriver driver, WebElement element, int timeOut) {
+        Wait<WebDriver> wait = null;
+        try {
+            wait = new FluentWait<WebDriver>((WebDriver) driver)
+                    .withTimeout(Duration.ofSeconds(20))
+                    .pollingEvery(Duration.ofSeconds(2))
+                    .ignoring(Exception.class);
+            wait.until(ExpectedConditions.visibilityOf(element));
+            element.click();
+        }catch(Exception e) {
+        }
 
     }
 
     @Override
     public void implicitWait(WebDriver driver, int timeOut) {
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(20));
 
     }
 
     @Override
-    public void explicitWait(WebDriver driver, WebElement element, int timeOut) {
-
+    public void explicitWait(WebDriver driver, WebElement element) {
+        Wait<WebDriver> wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        wait.until(ExpectedConditions.visibilityOf(element));
     }
 
     @Override
     public void pageLoadTimeOut(WebDriver driver, int timeOut) {
 
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
+
     }
 
     @Override
     public String screenShot(WebDriver driver, String filename) {
-        return null;
+        String dateName = new SimpleDateFormat("yyyy-MM-dd-hhmmss").format(new Date());
+        TakesScreenshot takesScreenshot = (TakesScreenshot) driver;
+        File source = takesScreenshot.getScreenshotAs(OutputType.FILE);
+        String destination = System.getProperty("user.dir")+"\\Screenshots"+filename+"_"+dateName+".png";
+        try {
+            FileUtils.copyFile(source,new File(destination));
+        }catch (Exception e){
+            e.printStackTrace();
+
+        }
+        return dateName;
     }
 
     @Override
